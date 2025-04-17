@@ -11,4 +11,4 @@ R and MATLAB code that coincide with Project IV report on Parameter Estimation o
 
 
 **Multi-Strain Parameter Estimation**
-- 
+- [Multi-Strain PMCMC (R)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/3143a76e5aceefccba65c4e75672b81be2e3c2a6/Multi-Strain%20Estimation.R)
