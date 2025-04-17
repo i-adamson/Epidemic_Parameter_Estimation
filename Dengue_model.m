@@ -29,38 +29,6 @@ t = 0:0.1:500;
 %%model%%
 %y = [S I1 I2 R1 R2 S1 S2 I12 I21 R];
 
-
-
-function[S, I1, I2, R1, R2, S1, S2, I12, I21, R] = two_strain(b1,b2,g,m,a,p,p1,p2,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t)
-dydt = @(t,y)[-(b1/N)*y(1)*(y(2)+p*y(9))-(b2/N)*y(1)*(y(3)+p*y(8))+m*(N-y(1));
-               (b1/N)*y(1)*(y(2)+p*y(9))-(g+m)*y(2);
-               (b2/N)*y(1)*(y(3)+p*y(8))-(g+m)*y(3);
-               g*y(2)-(a+m)*y(4);
-               g*y(3)-(a+m)*y(5);
-               -(b2/N)*y(6)*(y(3)+p2*y(8))+a*y(4)-m*y(6);
-               -(b2/N)*y(7)*(y(2)+p1*y(9))+a*y(5)-m*y(7);
-               (b2/N)*y(6)*(y(3)+p2*y(8))-(g+m)*y(8);
-               (b2/N)*y(7)*(y(2)+p1*y(9))-(g+m)*y(9);
-               g*(y(8)+y(9))-m*y(10)];
-  
-opts = odeset('abstol',1e-25, 'reltol', 1e-25, 'maxstep', 0.01);
-
-[~,y] = ode15s(dydt, t, [S0 I10 I20 R10 R20 S10 S20 I120 I210 R0], opts);
-
-%parse outputs
-S = y(:,1);
-I1 = y(:,2);
-I2 = y(:,3);
-R1 = y(:,4);
-R2 = y(:,5);
-S1 = y(:,6);
-S2 = y(:,7);
-I12 = y(:,8);
-I21 = y(:,9);
-R = y(:,10);
-
-end
-
 [S,I1,I2,R1,R2,S1,S2,I12,I21,R] = two_strain(b1,b2,g,m,a,p,p1,p2,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t);
 
 % %plotting all the variables separately
@@ -109,3 +77,33 @@ counts = (I1+I2+I12+I21);
 Idata = table(times, counts, 'VariableNames',{'Time', 'I'});
 
 save('I.mat', 'Idata');
+
+function[S, I1, I2, R1, R2, S1, S2, I12, I21, R] = two_strain(b1,b2,g,m,a,p,p1,p2,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t)
+dydt = @(t,y)[-(b1/N)*y(1)*(y(2)+p*y(9))-(b2/N)*y(1)*(y(3)+p*y(8))+m*(N-y(1));
+               (b1/N)*y(1)*(y(2)+p*y(9))-(g+m)*y(2);
+               (b2/N)*y(1)*(y(3)+p*y(8))-(g+m)*y(3);
+               g*y(2)-(a+m)*y(4);
+               g*y(3)-(a+m)*y(5);
+               -(b2/N)*y(6)*(y(3)+p2*y(8))+a*y(4)-m*y(6);
+               -(b2/N)*y(7)*(y(2)+p1*y(9))+a*y(5)-m*y(7);
+               (b2/N)*y(6)*(y(3)+p2*y(8))-(g+m)*y(8);
+               (b2/N)*y(7)*(y(2)+p1*y(9))-(g+m)*y(9);
+               g*(y(8)+y(9))-m*y(10)];
+  
+opts = odeset('abstol',1e-25, 'reltol', 1e-25, 'maxstep', 0.01);
+
+[~,y] = ode15s(dydt, t, [S0 I10 I20 R10 R20 S10 S20 I120 I210 R0], opts);
+
+%parse outputs
+S = y(:,1);
+I1 = y(:,2);
+I2 = y(:,3);
+R1 = y(:,4);
+R2 = y(:,5);
+S1 = y(:,6);
+S2 = y(:,7);
+I12 = y(:,8);
+I21 = y(:,9);
+R = y(:,10);
+
+end
