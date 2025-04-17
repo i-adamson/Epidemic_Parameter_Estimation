@@ -64,48 +64,45 @@ end
 [S,I1,I2,R1,R2,S1,S2,I12,I21,R] = two_strain(b1,b2,g,m,a,p,p1,p2,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t);
 
 % %plotting all the variables separately
-% figure
-% plot(S, 'LineWidth',2)
-% hold on, grid on
-% plot(I1, 'LineWidth',2)
-% plot(I2, 'LineWidth',2)
-% plot(R1, 'LineWidth',2)
-% plot(R2, 'LineWidth',2)
-% plot(S1, 'LineWidth',2)
-% plot(S2, 'LineWidth',2)
-% plot(I12, 'LineWidth',2)
-% plot(I21, 'LineWidth',2)
-% plot(R, 'LineWidth',2)
-% % title('Dengue Multi-Strain Model','fontsize',14,'Interpreter','latex')
-% xlabel('Time (Days)','fontsize',14,'Interpreter','latex')
-% ylabel('Population (people)','fontsize',14,'Interpreter','latex')
-% legend('S','I1','I2','R1','R2','S1','S2','I12','I21','R', 'fontsize',14,'Interpreter','latex')
-% 
-% % %%plotting compiled S, I, R
-% figure
-% plot(S+S1+S2, 'LineWidth',2)
-% hold on, grid on
-% % title('Dengue Multi-Strain Model','fontsize',14,'Interpreter','latex')
-% xlabel('Time (years)','fontsize',14,'Interpreter','latex')
-% ylabel('$S = S+S_1+S_2$','fontsize',14,'Interpreter','latex')
-% legend('S','I','R', 'fontsize',14,'Interpreter','latex')
+figure
+plot(S, 'LineWidth',2)
+hold on, grid on
+plot(I1, 'LineWidth',2)
+plot(I2, 'LineWidth',2)
+plot(R1, 'LineWidth',2)
+plot(R2, 'LineWidth',2)
+plot(S1, 'LineWidth',2)
+plot(S2, 'LineWidth',2)
+plot(I12, 'LineWidth',2)
+plot(I21, 'LineWidth',2)
+plot(R, 'LineWidth',2)
+xlabel('Time (Years)','fontsize',14,'Interpreter','latex')
+ylabel('Population (people)','fontsize',14,'Interpreter','latex')
+legend('S','I1','I2','R1','R2','S1','S2','I12','I21','R', 'fontsize',14,'Interpreter','latex') 
+
+%%plotting compiled S, I, R
+figure
+plot(S+S1+S2, 'LineWidth',2)
+hold on, grid on
+xlabel('Time (years)','fontsize',14,'Interpreter','latex')
+ylabel('$S = S+S_1+S_2$','fontsize',14,'Interpreter','latex')
+legend('S', 'fontsize',14,'Interpreter','latex')
 % 
 % 
 figure
 plot(I1+I2+I12+I21, 'LineWidth',2, 'Color', [0.88 0.45 0.08])
 hold on, grid on
-% title('Dengue Multi-Strain Model','fontsize',14,'Interpreter','latex')
 xlabel('Time (years)','fontsize',14,'Interpreter','latex')
 ylabel('$I = I_1+I_2+I_{21}+I_{12}$','fontsize',14,'Interpreter','latex')
 legend('I', 'fontsize',14,'Interpreter','latex')
 % 
-% figure
-% plot(R+R1+R2, 'LineWidth',2, 'Color', [0.16 0.68 0.27])
-% hold on, grid on
+figure
+plot(R+R1+R2, 'LineWidth',2, 'Color', [0.16 0.68 0.27])
+hold on, grid on
 % % title('Dengue Multi-Strain Model','fontsize',14,'Interpreter','latex')
-% xlabel('Time (years)','fontsize',14,'Interpreter','latex')
-% ylabel('$R = R+R_1+R_2','fontsize',14,'Interpreter','latex')
-% legend('R', 'fontsize',14,'Interpreter','latex')
+xlabel('Time (years)','fontsize',14,'Interpreter','latex')
+ylabel('$R = R+R_1+R_2'$,'fontsize',14,'Interpreter','latex')
+legend('R', 'fontsize',14,'Interpreter','latex')
 
 times = t(:);
 counts = (I1+I2+I12+I21);
