@@ -2,13 +2,13 @@
 %%parameters%%
 
 b1 = 104;     %infection rate of strain 1
-b2 = 110;   %infection rate of strain 2
+b2 = 120;   %infection rate of strain 2
 g =  52;   %recovery rate
 m = 1/65;    %demography rate
 a = 2;    %temporary immunity rate
-p = 0.1;    %ratio of contribution to force of initial infection (both strains)
-p1 = 0.01;   %ratio of contribution to force of secondary infection of 1
-p2 = 0.01;   %ratio of contribution to force of secondary infection of 2
+p = 0.6;    %ratio of contribution to force of initial infection (both strains)
+p1 = 0.6;   %ratio of contribution to force of secondary infection of 1
+p2 = 0.6;   %ratio of contribution to force of secondary infection of 2
 
 
 %initial conditions
@@ -19,8 +19,8 @@ R10 = 0;
 R20 = 0;
 S10 = 0;
 S20 = 0;
-I120 = 10;
-I210 = 10;
+I120 = 20;
+I210 = 20;
 R0 = 0;
 N = S0+I10+I20+R10+R20+S10+S20+I120+I210+R0;
 
