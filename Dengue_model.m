@@ -69,7 +69,7 @@ plot(R+R1+R2, 'LineWidth',2, 'Color', [0.16 0.68 0.27])
 hold on, grid on
 % % title('Dengue Multi-Strain Model','fontsize',14,'Interpreter','latex')
 xlabel('Time (years)','fontsize',14,'Interpreter','latex')
-ylabel('$R = R+R_1+R_2'$,'fontsize',14,'Interpreter','latex')
+ylabel('$R = R+R_1+R_2$','fontsize',14,'Interpreter','latex')
 legend('R', 'fontsize',14,'Interpreter','latex')
 
 times = t(:);
