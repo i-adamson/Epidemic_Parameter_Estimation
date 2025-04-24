@@ -1,0 +1,104 @@
+b1 = 104;     %infection rate of strain 1
+b2 = 120;   %infection rate of strain 2
+g =  52;   %recovery rate
+m = 1/65;    %demography rate
+a = 2;    %temporary immunity rate
+p = 0.6;    %ratio of contribution to force of initial infection (both strains)
+p1 = 0.6;   %ratio of contribution to force of secondary infection of 1
+p2 = 0.6;   %ratio of contribution to force of secondary infection of 2
+
+
+%initial conditions
+S0 = 10000;
+I10 =20;
+I20 = 20;
+R10 = 0;
+R20 = 0;
+S10 = 0;
+S20 = 0;
+I120 = 20;
+I210 = 20;
+R0 = 0;
+N = S0+I10+I20+R10+R20+S10+S20+I120+I210+R0;
+
+t = 0:0.1:500;
+
+phi_values = [0.1 0.19 0.34 0.37 0.9]; 
+z1_results = zeros(length(phi_values), 1);
+
+
+
+
+for i = 1:length(phi_values)
+    phi = phi_values(i);
+    [S,I1,I2,R1,R2,S1,S2,I12,I21,R] = two_strain(b1,b2,g,m,a,phi,phi,phi,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t);
+    times = t(:);
+    counts = (I1+I2+I12+21);
+    Idata = table(times, counts, 'VariableNames',{'Time', 'I'});
+    dat = Idata.I(3000:15:end);
+    z1_results(i) = z1test(dat);
+end
+
+disp('Results of z1test for different phi values:');
+disp(table(phi_values', z1_results, 'VariableNames', {'Phi', 'Z1Test'}));
+
+
+
+
+
+function[S, I1, I2, R1, R2, S1, S2, I12, I21, R] = two_strain(b1,b2,g,m,a,p,p1,p2,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t)
+dydt = @(t,y)[-(b1/N)*y(1)*(y(2)+p*y(9))-(b2/N)*y(1)*(y(3)+p*y(8))+m*(N-y(1));
+               (b1/N)*y(1)*(y(2)+p*y(9))-(g+m)*y(2);
+               (b2/N)*y(1)*(y(3)+p*y(8))-(g+m)*y(3);
+               g*y(2)-(a+m)*y(4);
+               g*y(3)-(a+m)*y(5);
+               -(b2/N)*y(6)*(y(3)+p2*y(8))+a*y(4)-m*y(6);
+               -(b2/N)*y(7)*(y(2)+p1*y(9))+a*y(5)-m*y(7);
+               (b2/N)*y(6)*(y(3)+p2*y(8))-(g+m)*y(8);
+               (b2/N)*y(7)*(y(2)+p1*y(9))-(g+m)*y(9);
+               g*(y(8)+y(9))-m*y(10)];
+  
+opts = odeset('abstol',1e-25, 'reltol', 1e-25, 'maxstep', 0.1);
+
+[~,y] = ode15s(dydt, t, [S0 I10 I20 R10 R20 S10 S20 I120 I210 R0], opts);
+
+%parse outputs
+S = y(:,1);
+I1 = y(:,2);
+I2 = y(:,3);
+R1 = y(:,4);
+R2 = y(:,5);
+S1 = y(:,6);
+S2 = y(:,7);
+I12 = y(:,8);
+I21 = y(:,9);
+R = y(:,10);
+
+end
+
+
+function kmedian=z1test(x)
+s=size(x); if s(2)==1; x=x'; end;
+N=length(x); j=[1:N];
+t=[1:round(N/10)];
+M=zeros(1,round(N/10));
+c=pi/5+rand(1,100)*3*pi/5;  % 100 random c values in [pi/5,4pi/5]
+for its=1:100
+   p=cumsum(x.*cos(j*c(its)));q=cumsum(x.*sin(j*c(its)));
+   for n=1:round(N/10); 
+      M(n)=mean( (p(n+1:N)-p(1:N-n)).^2 + (q(n+1:N)-q(1:N-n)).^2 )- ...
+           mean(x)^2*(1-cos(n*c(its)))/(1-cos(c(its)));
+   end
+   kcorr(its)=corr(t',M');
+end
+
+% Two crude attempts to check for oversampling:
+if (max(x)-min(x) )/mean(abs(diff(x))) > 10 | ...
+       median(kcorr(c<mean(c))) - median(kcorr(c>mean(c))) > 0.5
+   disp('Warning: data is probably oversampled.')
+   disp('Use coarser sampling or reduce the maximum value of c.')
+end
+kmedian=median(kcorr);
+msg = sprintf('K = %.3f', median(kcorr));
+end
+
