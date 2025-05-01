@@ -2,7 +2,7 @@
 R and MATLAB code that coincide with Project IV report on Parameter Estimation of Multi-Strain Epidemic Models
 
 **Single-Strain Parameter Estimation**
-- [SEIR and SIRS Model Simulations (MATLAB)]()
+- [SEIR and SIRS Model Simulations (MATLAB)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/7ba34b3d7f3476cc16550d0538476b964d10cc4b/SEIR_SIRS_sim)
 - [SIRS Bifurcation Plots (MATLAB)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/1fea98a4151ff4c2f74315c53c011a0180262c9c/SIRS_bifurcations.m)
 - [Dureau Model Example (R)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/a06b1bf5333a029bc0e8eb3bb624a200e7ae96b2/PMCMC.dureau.R)
 
