@@ -1,0 +1,81 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%parameters%%
+
+b = 0.3;     %infection rate
+k = 1/7;      %infected to infectious rate
+g =  0.1;     %recovery rate
+a = 0.2;
+
+%initial conditions
+S0 = 100;
+E0 = 0;
+I0 = 2;
+R0 = 0;
+N = S0+E0+I0+R0;
+
+t = 0:1:150;
+
+%%model%%
+%y = [S E I R];
+
+[S1,E,I1,R1] = seir(b,k,g,S0,E0,I0,R0,N,t);
+[S2,I2,R2] = sirs(b,g,a,S0,I0,R0,N,t);
+
+% %plotting
+figure
+subplot(1,2,1)
+plot(S1, 'LineWidth',2)
+hold on, grid on
+plot(E, 'LineWidth',2)
+plot(I1, 'LineWidth',2)
+plot(R1, 'LineWidth',2)
+xlabel('Time (Days)','fontsize',18,'Interpreter','latex')
+ylabel('Population (people)','fontsize',18,'Interpreter','latex')
+title('SEIR','fontsize',18,'Interpreter','latex')
+legend('S','E','I','R', 'fontsize',18,'Interpreter','latex')
+
+subplot(1,2,2)
+plot(S2, 'LineWidth',2)
+hold on, grid on
+plot(I2, 'LineWidth',2)
+plot(R2, 'LineWidth',2)
+xlabel('Time (Days)','fontsize',18,'Interpreter','latex')
+ylabel('Population (people)','fontsize',18,'Interpreter','latex')
+title('SIRS','fontsize',18,'Interpreter','latex')
+legend('S','I','R', 'fontsize',18,'Interpreter','latex')
+
+
+
+function[S, E, I, R] = seir(b,k,g,S0,E0,I0,R0,N,t)
+dydt = @(t,y)[-(b*y(1)*y(3))/N;
+                (b*y(1)*y(3))/N-k*y(2);
+                k*y(2)-g*y(3);
+                g*y(3)];
+  
+opts = odeset('abstol',1e-06, 'reltol', 1e-08, 'maxstep', 0.01);
+
+[~,y] = ode45(dydt, t, [S0 E0 I0 R0], opts);
+
+%parse outputs
+S = y(:,1);
+E = y(:,2);
+I = y(:,3);
+R = y(:,4);
+
+end
+
+function[S, I, R] = sirs(b,g,a,S0,I0,R0,N,t)
+dydt = @(t,y)[-(b*y(1)*y(2))/N + a*y(3);
+                (b*y(1)*y(2))/N-g*y(2);
+                g*y(2)-a*y(3)];
+  
+opts = odeset('abstol',1e-06, 'reltol', 1e-08, 'maxstep', 0.01);
+
+[~,y] = ode45(dydt, t, [S0 I0 R0], opts);
+
+%parse outputs
+S = y(:,1);
+I = y(:,2);
+R = y(:,3);
+
+end
