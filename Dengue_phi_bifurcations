@@ -1,0 +1,61 @@
+using Revise, Plots, DifferentialEquations, LinearAlgebra
+using BifurcationKit
+
+recordFromSolution(x,p;k...) = (S = x[1], I1 = x[2], I2 = x[3], R1 = x[4], R2 = x[5], S1 = x[6], S2 = x[7], I12 = x[8], I21 = x[9], R = x[10])
+
+function dengue!(dz, z, p, t)
+		beta1  = p[1]
+    		beta2  = p[2]
+    		phi    = p[3]
+    		mu     = p[4]
+    		gamma  = p[5]
+    		alpha  = p[6]
+
+		S, I1, I2, R1, R2, S1, S2, I12, I21, R = z
+		dz[1] = -beta1*S*(I1+phi*I21)-beta2*S*(I2+phi*I12)+mu*S
+		dz[2] = beta1*S*(I1+phi*I21)-(gamma+mu)*I1
+		dz[3] = beta2*S*(I2+phi*I12)-(gamma+mu)*I2
+		dz[4] = gamma*I1-(alpha+mu)*R1
+		dz[5] = gamma*I2-(alpha+mu)*R2
+		dz[6] = -beta2*S1*(I2+phi*I12)+alpha*R1-mu*S1
+		dz[7] = -beta1*S2*(I1+phi*I21)+alpha*R2-mu*S2
+		dz[8] = beta2*S1*(I2+phi*I12)-(gamma+mu)*I12
+		dz[9] = beta1*S2*(I1+phi*I21)-(gamma+mu)*I21
+		dz[10] = gamma*(I12+I21)-mu*R
+		return dz
+end
+
+par_dengue = (beta1 = 0.1, beta2 =0.3, phi = 1.0, mu = 0.01, gamma = 0.1, alpha = 0.05)
+
+z0 = (S=.92, I1 =.02, I2=.02, R1=0, R2=0, S1=0, S2=0, I12=0.02, I21=0.02, R=0)
+
+z0vec = collect(values(z0))
+z0vec = Float64[z0...]
+typeof(z0vec) == Vector{Float64}
+typeof(p_tuple) == NTuple{6, Float64}
+p_tuple = values(par_dengue)
+
+prob = BifurcationProblem(dengue!, z0vec, p_tuple,
+		(@optic _[3]), record_from_solution = recordFromSolution)
+
+opts = ContinuationPar(
+    ds = 0.0001,          # Continuation step size
+    dsmax = 0.001,        # Maximum step size
+    n_inversion = 8,     # Number of inversions
+    detect_bifurcation = 3,  # Bifurcation detection method (fold, Hopf, etc.)
+    max_steps = 20000,    # Maximum number of steps for continuation
+    p_min = 0.0,         # Minimum parameter value
+    p_max = 4.0,         # Maximum parameter value
+    nev = 100,            # Number of eigenvalues to track
+    save_sol_every_step = true,  # Option to save solution at each step  # Disable event detection
+)
+
+diagram = bifurcationdiagram(prob, PALC(), 3, opts)
+
+scene = plot(diagram; code = ())
+
+
+
+
+
+
