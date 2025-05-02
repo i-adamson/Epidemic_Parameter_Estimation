@@ -1,5 +1,7 @@
 # Epidemic_Parameter_Estimation
-R and MATLAB code that coincide with Project IV report on Parameter Estimation of Multi-Strain Epidemic Models
+R and MATLAB code that coincide with Project IV report on Parameter Estimation of Multi-Strain Epidemic Models, along with the full report.
+
+[The Full Report]()
 
 **Single-Strain Parameter Estimation**
 - [SEIR and SIRS Model Simulations (MATLAB)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/7ba34b3d7f3476cc16550d0538476b964d10cc4b/SEIR_SIRS_sim)
