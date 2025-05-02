@@ -46,7 +46,7 @@ for(i in 2:l){
 S0 <- N - (z1+z2+R1+R2)
 
 ################################################################################
-## INITIAL PMCMC RUN TO ESTIMATE BETA1 AND BETA2 ###############################
+## PMCMC RUN TO ESTIMATE BETA1 AND BETA2 ###############################
 ################################################################################
 y1 <- data.frame(value = z1) %>%
   mutate(time = seq(1, by = 1, length.out = n())) %>%
@@ -223,200 +223,102 @@ g_beta1 <- ggplot(data = plot_df_beta1) +
   ylab(TeX("Transmissibility ($\\beta_1(t)$)")) +
   xlab("Time")
 g_beta1
-
-beta_1 <- data.frame(time = c(multi_bi_lst$x1$time), beta_1 = c(exp(multi_bi_lst$x1$value)))
-beta_2 <- data.frame(time = c(multi_bi_lst$x2$time), beta_2 = c(exp(multi_bi_lst$x2$value)))
-  
-################################################################################
-## SECOND PMCMC RUN TO ESTIMATE PHI1 AND PHI2 ##################################
-################################################################################
-
-beta1_dat <- multi_bi_lst$x1 %>%
-  group_by(time) %>%
-  summarise(value = mean(value)) %>%
-  mutate(value = exp(value))
-
-beta2_dat <- multi_bi_lst$x2 %>%
-  group_by(time) %>%
-  summarise(value = mean(value)) %>%
-  mutate(value = exp(value))
-
-
-multi2_model_str <- "
-model multi2 {
-  obs y1
-  obs y2
-
-  state S
-  state I1
-  state I2
-  state R1
-  state R2
-  state S1
-  state S2
-  state I12
-  state I21
-  state phi1
-  state phi2
-  
-  state lambda1
-  state lambda2
-
-  state Z1
-  state Z2
-
-  input N
-  
-  param gamma
-  param alpha
-  param sigma // Noise driver
-  param I10
-  param I20
-  param R10
-  param R20
-  param tau1
-  param tau2
-  param phi10
-  param phi20
-  
-  param beta1
-  param beta2
-
-  sub parameter {
-    gamma ~ truncated_gaussian(1.08, 0.075, lower=0.1, upper=5)
-    alpha ~ truncated_gaussian(1.08, 0.075, lower=0.1, upper=5)
-    sigma ~ truncated_gaussian(0.5, 0.2, lower=1e-6, upper=2)
-    tau1 ~ truncated_gaussian(0.1, 0.05, lower=1e-6, upper=1)
-    tau2 ~ truncated_gaussian(0.1, 0.05, lower=1e-6, upper=1)
-    I10 ~ uniform(-9, -5)
-    I20 ~ uniform(-9, -5)
-    R10 ~ truncated_gaussian(0.15, 0.15, lower = 0, upper = 1)
-    R20 ~ truncated_gaussian(0.15, 0.15, lower = 0, upper = 1)
-    phi10 ~ truncated_gaussian(1, 0.05, lower = 0)
-    phi20 ~ truncated_gaussian(1, 0.05, lower = 0)
-  }
-
-  sub initial {
-    S <- N
-    R1 <- R10*S
-    R2 <- R20*S
-    S <- S - R1 - R2
-
-    I1 <- exp(I10 + log(S))
-    I2 <- exp(I20 + log(S))
-    S <- S - I1 - I2
-    
-    S1 <- alpha*R1
-    S2 <- alpha*R2
-    I12 <- 0
-    I21 <- 0
-    Z1 <- 0
-    Z2 <- 0
-    
-    phi1 <- phi10
-    phi2 <- phi20
-  }
-
-  sub transition(delta = 1) {
-    S <- max(S, 1)
-    I1 <- max(I1, 0)
-    I2 <- max(I2, 0)
-    R1 <- max(R1, 0)
-    R2 <- max(R2, 0)
-    S1 <- max(S1, 1)
-    S2 <- max(S2, 1)
-    I12 <- max(I12, 0)
-    I21 <- max(I21, 0)
-    
-    Z1 <- ((t_now) % 1 == 0 ? 0 : Z1)
-    Z2 <- ((t_now) % 1 == 0 ? 0 : Z2)
-    
-    noise e1
-    e1 ~ wiener()
-    noise e2
-    e2 ~ wiener()
-    
-    phi1 <- max(phi1, 1e-3)
-    phi2 <- max(phi2, 1e-3)
-    
-    lambda1 <- beta1*(I1 + phi1*I21)/N 
-    lambda2 <- beta2*(I2 + phi2*I12)/N
-      
-    ode(alg = 'RK4(3)', h = 0.5, atoler = 1.0e-5, rtoler = 1.0e-5) {
-       dS/dt    = -lambda1*S - lambda2*S + R1/alpha + R2/alpha
-       dI1/dt   = lambda1*S - I1/gamma
-       dI2/dt   = lambda2*S - I2/gamma
-       dR1/dt   = I1/gamma - R1/alpha
-       dR2/dt   = I2/gamma - R2/alpha
-       dS1/dt   = R1/alpha - lambda2*S1
-       dS2/dt   = R2/alpha - lambda1*S2
-       dI12/dt  = lambda2*S1 - I12/gamma
-       dI21/dt  = lambda1*S2 - I21/gamma
-       
-       dZ1/dt   = lambda1*S + lambda1*S2
-       dZ2/dt   = lambda2*S + lambda2*S1
-       
-       dphi1/dt = sigma * e1
-       dphi2/dt = sigma * e2
-    }
-  }
-
-  sub observation {
-    y1 ~ poisson(max(Z1, 1e-10))
-    y2 ~ poisson(max(Z2, 1e-10))
-}
-
-  sub proposal_parameter {
-    sigma ~ gaussian(sigma, 0.01)
-    gamma ~ gaussian(gamma, 0.01)
-    alpha ~ gaussian(alpha, 0.01)
-    I10 ~ gaussian(I10, 0.05)
-    I20 ~ gaussian(I20, 0.05)
-    R10 ~ gaussian(R10, 0.05)
-    R20 ~ gaussian(R20, 0.05)
-    tau1 ~ gaussian(tau1, 0.05)
-    tau2 ~ gaussian(tau2, 0.05)
-    phi1 ~ gaussian(phi1, 0.05)
-    phi2 ~ gaussian(phi2, 0.05)
-  }
-}"
-
-ncores <- 8
-minParticles <- max(128, 16 * ncores)
-
-multi2_model <- bi_model(lines = stringi::stri_split_lines(multi2_model_str)[[1]])
-
-multi2_bi_model <- libbi(multi2_model)
-input_lst <- list(N = 5630000,
-                  beta1 = beta1_dat,
-                  beta2 = beta2_dat)
-end_time <- max(y1$time)
-obs_lst <- list(y1 = y1 %>% dplyr::filter(time <= end_time),
-                y2 = y2 %>% dplyr::filter(time <= end_time))
-
-multi2_bi <- sample(multi2_model, target = "joint", end_time = end_time, input = input_lst, obs = obs_lst, nsamples = 100, 
-                   nparticles = minParticles, nthreads = ncores, proposal = 'model', verbose = TRUE)%>%
-  adapt_particles(min = minParticles, max = minParticles*200)  %>%
-  adapt_proposal(min = 0.05, max = 0.4, adapt = "both") %>%
-  sample(nsamples = 5, thin = 1)  %>% # burn in 
+ 1)  %>% # burn in 
   sample(nsamples = 5, thin = 1)
 
-multi2_bi_lst <- bi_read(multi2_bi %>% sample_obs)
-
-plot(multi2_bi_lst$phi1$time, multi2_bi_lst$phi1$value)
-mean(multi2_bi_lst$phi1$value)
-
-
-
-################################################################################
-## PREDICTIVE PERIOD ###########################################################
-################################################################################
-
+plot_df_beta2 <- multi_bi_lst$x2 %>% mutate(value = exp(value)) %>%
+  group_by(time) %>%
+  mutate(
+    q025 = quantile(value, 0.025),
+    q25 = quantile(value, 0.25),
+    q50 = quantile(value, 0.5),
+    q75 = quantile(value, 0.75),
+    q975 = quantile(value, 0.975)
+  ) %>% ungroup()
 
 
+g_beta2 <- ggplot(data = plot_df_beta2) +
+  geom_ribbon(aes(x = time, ymin = q25, ymax = q75),fill="royalblue3", alpha = 0.3) +
+  geom_ribbon(aes(x = time, ymin = q025, ymax = q975),fill="cornflowerblue", alpha = 0.3) +
+  geom_line(aes(x = time, y = q50)) +
+  ylab(TeX("$\\tilde{beta}_2(t)$")) +
+  xlab("Time")+
+  theme(axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),)
+g_beta2
+
+#combined plot
+plot_df_beta_comb <- bind_rows(
+  plot_df_beta1 %>% mutate(beta_type = "Beta1"),
+  plot_df_beta2 %>% mutate(beta_type = "Beta2")
+)
+
+g_beta_comb <- ggplot(data = plot_df_beta_comb) +
+  geom_ribbon(data = plot_df_beta_comb, aes(x = time, ymin = q25, ymax = q75, fill = beta_type), alpha = 0.3) +
+  geom_ribbon(data = plot_df_beta_comb, aes(x = time, ymin = q025, ymax = q975, fill = beta_type), alpha = 0.3) +
+  geom_line(aes(x = time, y = q50, color = beta_type)) +
+  ylab(TeX("Transmissibility ($\\beta(t)$)")) +
+  xlab("Time") +
+  scale_fill_manual(values = c("Beta1" = "royalblue3", "Beta2" = "cornflowerblue")) +
+  scale_color_manual(values = c("Beta1" = "blue", "Beta2" = "darkblue")) +
+  theme_minimal()
 
 
+##Calculate Rt given the truncated model and plot
 
+beta_1 <- data.frame(sample = c(multi_bi_lst$x1$np), time = c(multi_bi_lst$x1$time), beta_1 = c(exp(multi_bi_lst$x1$value)))
+beta_2 <- data.frame(sample = c(multi_bi_lst$x2$np), time = c(multi_bi_lst$x2$time), beta_2 = c(exp(multi_bi_lst$x2$value)))
+gamma_samp <- data.frame(sample = c(multi_bi_lst$gamma$np), gamma = c(multi_bi_lst$gamma$value))
+St <- multi_bi_lst$S
+
+
+Rt <- matrix(ncol = 2, nrow = 0)
+colnames(Rt) <- c("Time", "Rt")
+
+nsamp <- max(beta_1$sample)
+tmax <- max(beta_1$time)
+
+for(i in 0:nsamp){
+  for(j in 1:tmax){
+    gamma <- gamma_samp$gamma[i+1]
+    beta1 <- beta_1[beta_1$sample == i & beta_1$time == j, "beta_1"]
+    beta2 <- beta_2[beta_2$sample == i & beta_2$time == j, "beta_2"]
+    lambda1 <- beta1/gamma
+    lambda2 <- beta2/gamma
+    Ro <- max(lambda1, lambda2)
+    S <- St[St$np == i & St$time == j, "value"]
+    m <- Ro*S/N
+    Rt <- rbind(Rt, c(j, m))
+  }
+}
+Rt <- as.data.frame(Rt)
+
+plot_df_Rt <- Rt %>%
+  group_by(Time) %>%
+  mutate(
+    q025 = quantile(Rt, 0.025),
+    q25 = quantile(Rt, 0.25),
+    q50 = quantile(Rt, 0.5),
+    q75 = quantile(Rt, 0.75),
+    q975 = quantile(Rt, 0.975)
+  ) %>% ungroup()
+
+g_Rt <- ggplot(data = plot_df_Rt) +
+  geom_ribbon(aes(x = Time, ymin = q25, ymax = q75),fill="royalblue3", alpha = 0.3) +
+  geom_ribbon(aes(x = Time, ymin = q025, ymax = q975),fill="cornflowerblue", alpha = 0.3) +
+  geom_line(aes(x = Time, y = q50)) +
+  geom_hline(yintercept=1, linetype = "dashed", color = "red")+
+  ylab(TeX("$R_t$")) +
+  xlab("Time")+
+  theme(axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),)
+g_Rt
+
+ggarrange(g1, g_beta1, g_beta2, g_Rt, ncol = 2, nrow = 2, align = "v")
 
 
 
