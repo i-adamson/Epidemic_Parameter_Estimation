@@ -29,54 +29,7 @@ t = 0:0.1:500;
 %%model%%
 %y = [S I1 I2 R1 R2 S1 S2 I12 I21 R];
 
-[S,I1,I2,R1,R2,S1,S2,I12,I21,R] = two_strain(b1,b2,g,m,a,p,p1,p2,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t);
 
-% %plotting all the variables separately
-figure
-plot(S, 'LineWidth',2)
-hold on, grid on
-plot(I1, 'LineWidth',2)
-plot(I2, 'LineWidth',2)
-plot(R1, 'LineWidth',2)
-plot(R2, 'LineWidth',2)
-plot(S1, 'LineWidth',2)
-plot(S2, 'LineWidth',2)
-plot(I12, 'LineWidth',2)
-plot(I21, 'LineWidth',2)
-plot(R, 'LineWidth',2)
-xlabel('Time (Years)','fontsize',14,'Interpreter','latex')
-ylabel('Population (people)','fontsize',14,'Interpreter','latex')
-legend('S','I1','I2','R1','R2','S1','S2','I12','I21','R', 'fontsize',14,'Interpreter','latex') 
-
-%%plotting compiled S, I, R
-figure
-plot(S+S1+S2, 'LineWidth',2)
-hold on, grid on
-xlabel('Time (years)','fontsize',14,'Interpreter','latex')
-ylabel('$S = S+S_1+S_2$','fontsize',14,'Interpreter','latex')
-legend('S', 'fontsize',14,'Interpreter','latex')
-% 
-% 
-figure
-plot(I1+I2+I12+I21, 'LineWidth',2, 'Color', [0.88 0.45 0.08])
-hold on, grid on
-xlabel('Time (years)','fontsize',14,'Interpreter','latex')
-ylabel('$I = I_1+I_2+I_{21}+I_{12}$','fontsize',14,'Interpreter','latex')
-legend('I', 'fontsize',14,'Interpreter','latex')
-% 
-figure
-plot(R+R1+R2, 'LineWidth',2, 'Color', [0.16 0.68 0.27])
-hold on, grid on
-% % title('Dengue Multi-Strain Model','fontsize',14,'Interpreter','latex')
-xlabel('Time (years)','fontsize',14,'Interpreter','latex')
-ylabel('$R = R+R_1+R_2$','fontsize',14,'Interpreter','latex')
-legend('R', 'fontsize',14,'Interpreter','latex')
-
-times = t(:);
-counts = (I1+I2+I12+I21);
-Idata = table(times, counts, 'VariableNames',{'Time', 'I'});
-
-save('I.mat', 'Idata');
 
 function[S, I1, I2, R1, R2, S1, S2, I12, I21, R] = two_strain(b1,b2,g,m,a,p,p1,p2,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t)
 dydt = @(t,y)[-(b1/N)*y(1)*(y(2)+p*y(9))-(b2/N)*y(1)*(y(3)+p*y(8))+m*(N-y(1));
@@ -90,7 +43,7 @@ dydt = @(t,y)[-(b1/N)*y(1)*(y(2)+p*y(9))-(b2/N)*y(1)*(y(3)+p*y(8))+m*(N-y(1));
                (b2/N)*y(7)*(y(2)+p1*y(9))-(g+m)*y(9);
                g*(y(8)+y(9))-m*y(10)];
   
-opts = odeset('abstol',1e-25, 'reltol', 1e-25, 'maxstep', 0.01);
+opts = odeset('abstol',1e-16, 'reltol', 1e-16, 'maxstep', 0.01);
 
 [~,y] = ode15s(dydt, t, [S0 I10 I20 R10 R20 S10 S20 I120 I210 R0], opts);
 
@@ -107,3 +60,47 @@ I21 = y(:,9);
 R = y(:,10);
 
 end
+
+[S,I1,I2,R1,R2,S1,S2,I12,I21,R] = two_strain(b1,b2,g,m,a,p,p1,p2,S0,I10,I20,R10,R20,S10,S20,I120,I210,R0,N,t);
+
+
+figure;
+subplot(2,2,1);
+plot(S, 'LineWidth',2)
+hold on, grid on
+plot(I1, 'LineWidth',2)
+plot(I2, 'LineWidth',2)
+plot(R1, 'LineWidth',2)
+plot(R2, 'LineWidth',2)
+plot(S1, 'LineWidth',2)
+plot(S2, 'LineWidth',2)
+plot(I12, 'LineWidth',2)
+plot(I21, 'LineWidth',2)
+plot(R, 'LineWidth',2)
+xlabel('Time (Days)','fontsize',20,'Interpreter','latex')
+ylabel('Population (people)','fontsize',20,'Interpreter','latex')
+legend('S','I1','I2','R1','R2','S1','S2','I12','I21','R', 'fontsize',14,'Interpreter','latex')
+
+subplot(2,2,2);
+plot(S+S1+S2, 'LineWidth',2);
+xlabel('Time (years)','fontsize',20,'Interpreter','latex');
+ylabel('$\tilde{S} = S+S_1+S_2$','fontsize',20,'Interpreter','latex');
+legend('S','I','R', 'fontsize',20,'Interpreter','latex');
+
+subplot(2,2,3);
+plot(I1+I2+I12+I21, 'LineWidth',2, 'Color', [0.88 0.45 0.08]);
+xlabel('Time (years)','fontsize',20,'Interpreter','latex');
+ylabel('$\tilde{I} = I_1+I_2+I_{21}+I_{12}$','fontsize',14,'Interpreter','latex');
+legend('I', 'fontsize',20,'Interpreter','latex');
+
+subplot(2,2,4);
+plot(R+R1+R2, 'LineWidth',2, 'Color', [0.16 0.68 0.27]);
+xlabel('Time (years)','fontsize',20,'Interpreter','latex');
+ylabel('$\tilde{R} = R+R_1+R_2$','fontsize',20,'Interpreter','latex');
+legend('R', 'fontsize',20,'Interpreter','latex');
+
+times = t(:);
+counts = (I1+I2+I12+I21);
+Idata = table(times, counts, 'VariableNames',{'Time', 'I'});
+
+save('I.mat', 'Idata');
