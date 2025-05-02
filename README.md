@@ -5,7 +5,7 @@ R and MATLAB code that coincide with Project IV report on Parameter Estimation o
 - [SEIR and SIRS Model Simulations (MATLAB)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/7ba34b3d7f3476cc16550d0538476b964d10cc4b/SEIR_SIRS_sim)
 - [SIRS Bifurcation Plots (MATLAB)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/1fea98a4151ff4c2f74315c53c011a0180262c9c/SIRS_bifurcations.m)
 - [Dureau Model Example (R)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/a06b1bf5333a029bc0e8eb3bb624a200e7ae96b2/PMCMC.dureau.R)
-  - [Dureau Model Data]()
+  - [Dureau Model Data](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/2e70a479ac2e30ab1c9dcdd6903b8bd86d7145ce/PMCMC.Dureau.RData)
 
 
 **Multi-Strain Epidemic Models**
@@ -16,4 +16,5 @@ R and MATLAB code that coincide with Project IV report on Parameter Estimation o
 
 **Multi-Strain Parameter Estimation**
 - [Multi-Strain PMCMC (R)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/3143a76e5aceefccba65c4e75672b81be2e3c2a6/Multi-Strain%20Estimation.R)
+  - [Dengue and DHF Data]()
 - [Dengue Model Posterior Simulations and Chaos Test (MATLAB)](https://github.com/i-adamson/Epidemic_Parameter_Estimation/blob/84de7c8b629e8ba3fab777444ff5d3475fe9f1fc/Dengue_model_est.m)
